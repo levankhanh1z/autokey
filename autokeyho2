@@ -1,0 +1,46 @@
+local autoKeyPressing = false
+local cancelAutoKeyPress = nil
+
+-- Hàm để bắt đầu auto key press
+local function startAutoKeyPress(keyCode, clickDelay, releaseDelay)
+    autoKeyPressing = true
+    repeat
+        wait(clickDelay)
+        keypress(keyCode)
+        wait(releaseDelay)
+        keyrelease(keyCode)
+    until autoKeyPressing == false
+end
+
+-- Lệnh để bắt đầu auto key press cho phím "W"
+addcmd('autokeypress', {'keypress'}, function(args, speaker)
+    local code = Enum.KeyCode.W
+
+    local clickDelay = 0.1
+    local releaseDelay = 0.1
+    if args[1] and isNumber(args[1]) then clickDelay = args[1] end
+    if args[2] and isNumber(args[2]) then releaseDelay = args[2] end
+
+    execCmd('unautokeypress')
+    wait()
+
+    cancelAutoKeyPress = UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+        if not gameProcessedEvent then
+            if input.KeyCode == Enum.KeyCode.Backspace then
+                autoKeyPressing = false
+                cancelAutoKeyPress:Disconnect()
+            end
+        end
+    end)
+
+    notify('Auto Key Press', "Press [backspace] to stop")
+    startAutoKeyPress(code, clickDelay, releaseDelay)
+end)
+
+-- Lệnh để dừng auto key press
+addcmd('unautokeypress', {'unkeypress', 'stopkeypress'}, function(args, speaker)
+    autoKeyPressing = false
+    if cancelAutoKeyPress then
+        cancelAutoKeyPress:Disconnect()
+    end
+end)
