@@ -1,0 +1,44 @@
+local UserInputService = game:GetService("UserInputService")
+
+local autoKeyPressing = false
+local cancelAutoKeyPress = nil
+
+function keypress(key)
+    -- Thêm logic key press tại đây
+    print("Key pressed:", key)
+end
+
+function keyrelease(key)
+    -- Thêm logic key release tại đây
+    print("Key released:", key)
+end
+
+UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+    if not gameProcessedEvent then
+        if (input.KeyCode == Enum.KeyCode.Backspace and UserInputService:IsKeyDown(Enum.KeyCode.Equals)) or (input.KeyCode == Enum.KeyCode.Equals and UserInputService:IsKeyDown(Enum.KeyCode.Backspace)) then
+            autoKeyPressing = not autoKeyPressing
+            if autoKeyPressing then
+                autoKeyPress()
+            else
+                cancelAutoKeyPress()
+            end
+        end
+    end
+end)
+
+function autoKeyPress()
+    local code = Enum.KeyCode.W -- Thay đổi key code theo ý muốn
+    local clickDelay = 0.1
+    local releaseDelay = 0.1
+
+    repeat
+        wait(clickDelay)
+        keypress(code)
+        wait(releaseDelay)
+        keyrelease(code)
+    until not autoKeyPressing
+end
+
+function cancelAutoKeyPress()
+    print("Auto key press canceled")
+end
